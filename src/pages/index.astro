@@ -1,0 +1,144 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Hero from '../components/Hero.astro';
+import Section from '../components/Section.astro';
+import ProjectCard from '../components/ProjectCard.astro';
+import Events from '../components/Events.astro';
+import Allies from '../components/Allies.astro';
+import { getProjects } from '../lib/projects';
+import { eventJsonLd, getUpcomingEvents } from '../lib/events';
+import { COMMUNITY, SITE, SOCIAL } from '../site.config';
+
+const projects = await getProjects();
+const featured = projects.filter((p) => p.data.featured).slice(0, 3);
+const linkedin = SOCIAL.find((s) => s.label === 'LinkedIn');
+const jsonLd = (await getUpcomingEvents()).map(eventJsonLd);
+
+// Los cuatro pilares de "Sobre nosotros" en LinkedIn. Para anadir mas
+// secciones, copia un bloque <Section> y cambia el contenido.
+const pillars = [
+  {
+    k: '01',
+    title: 'Experimentación',
+    text: 'Se aprende haciendo: retos y una máquina propia para cada jugador, sin tener que montar nada.',
+  },
+  {
+    k: '02',
+    title: 'Trabajo colaborativo',
+    text: 'Comunidades aliadas, colaboradores y sponsors construyen cada edición del CTF junto a nosotros.',
+  },
+  {
+    k: '03',
+    title: 'Eventos técnicos',
+    text: 'CTF propios, villages y charlas en las conferencias de ciberseguridad del Perú.',
+  },
+  {
+    k: '04',
+    title: 'Ofensiva y defensiva',
+    text: 'Perfiles de ataque y de defensa en el mismo espacio, compartiendo lo que cada uno sabe.',
+  },
+];
+---
+
+<BaseLayout jsonLd={jsonLd}>
+  <Hero />
+
+  {featured.length > 0 && (
+    <Section id="proyectos" eyebrow="Proyectos" title="Lo último del laboratorio">
+      <a href="/projects/" class="btn" slot="actions">
+        Todos los proyectos
+        <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" /></svg>
+      </a>
+      <div class="cards">
+        {featured.map((p) => <div class="reveal"><ProjectCard project={p} /></div>)}
+      </div>
+    </Section>
+  )}
+
+  <Events />
+
+  <Section id="comunidad" eyebrow="Comunidad" title="Aprender haciendo, en comunidad" intro={SITE.mission}>
+    <ol role="list" class="principles">
+      {pillars.map((p) => (
+        <li class="reveal">
+          <span class="k mono">{p.k}</span>
+          <h3>{p.title}</h3>
+          <p>{p.text}</p>
+        </li>
+      ))}
+    </ol>
+  </Section>
+
+  <Allies />
+
+  <section class="cta-band container reveal" aria-labelledby="cta-titulo">
+    <div class="cta-inner">
+      <p class="eyebrow">Únete</p>
+      <h2 id="cta-titulo">Retos, eventos y gente que comparte tu pasión por la ciberseguridad.</h2>
+      <div class="cta-actions">
+        <a href={COMMUNITY.href} class="btn btn-primary" rel="noopener" target="_blank">
+          Entrar al grupo de {COMMUNITY.label}
+          <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M5 11 11 5M6 5h5v5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" /></svg>
+        </a>
+        {linkedin && (
+          <a href={linkedin.href} class="btn" rel="noopener" target="_blank">
+            Seguir en LinkedIn
+            <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M5 11 11 5M6 5h5v5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" /></svg>
+          </a>
+        )}
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 340px), 1fr));
+    gap: 20px;
+  }
+  .cards > div { display: grid; }
+
+  /* Columnas fijas (4 / 2 / 1) y no auto-fit: con 4 elementos, auto-fit deja
+     filas de 3+1 con un hueco vacio. */
+  .principles {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    background: var(--border);
+  }
+  .principles li {
+    padding: 30px 26px 34px;
+    background: var(--bg);
+    transition: background-color 0.3s;
+  }
+  .principles li:hover { background: var(--bg-elev); }
+  .k { font-size: 0.8rem; color: var(--violet); }
+  .principles h3 { margin-top: 2.2rem; font-size: 1.3rem; }
+  .principles p { margin-top: 0.7rem; color: var(--text-muted); font-size: 0.97rem; }
+
+  @media (max-width: 1060px) { .principles { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 600px) { .principles { grid-template-columns: 1fr; } }
+
+  .cta-band { margin-top: var(--section-space); }
+  .cta-inner {
+    position: relative;
+    overflow: hidden;
+    display: grid;
+    justify-items: center;
+    gap: 1.4rem;
+    padding: clamp(48px, 8vw, 88px) var(--gutter);
+    border-radius: calc(var(--radius) + 8px);
+    border: 1px solid var(--border-strong);
+    text-align: center;
+    background:
+      radial-gradient(60% 120% at 50% 0%, rgb(139 92 246 / 0.28), transparent 70%),
+      radial-gradient(40% 80% at 90% 100%, rgb(59 130 246 / 0.2), transparent 70%),
+      var(--bg-elev);
+  }
+  .cta-inner h2 { font-size: clamp(1.7rem, 4vw, 2.6rem); max-width: 26ch; }
+  .cta-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.75rem; }
+</style>

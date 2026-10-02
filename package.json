@@ -1,0 +1,27 @@
+{
+  "name": "hackl4bs-web",
+  "type": "module",
+  "version": "0.0.1",
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "brand": "node scripts/brand-assets.mjs",
+    "descarga": "node scripts/importar-descarga.mjs",
+    "capturas": "node scripts/capturas.mjs",
+    "aliado": "node scripts/logo-aliado.mjs",
+    "astro": "astro"
+  },
+  "dependencies": {
+    "@astrojs/sitemap": "^3.7.4",
+    "@fontsource-variable/jetbrains-mono": "^5.3.0",
+    "@fontsource-variable/space-grotesk": "^5.3.0",
+    "astro": "^7.3.5"
+  },
+  "allowScripts": {
+    "esbuild": true
+  }
+}

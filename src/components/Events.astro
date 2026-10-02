@@ -1,0 +1,226 @@
+---
+// Seccion "Proximos eventos": los .md de src/content/events/ con fecha de hoy
+// en adelante. Se puede poner en cualquier pagina con <Events />.
+import { Image } from 'astro:assets';
+import Section from './Section.astro';
+import { dateParts, eventHours, eventPlace, getUpcomingEvents } from '../lib/events';
+
+const events = await getUpcomingEvents();
+---
+
+<Section
+  id="eventos"
+  eyebrow="Próximos eventos"
+  title="Dónde encontrar a HackL4bs"
+  intro="Charlas y villages donde vas a encontrar a la comunidad HackL4bs. Pasa a saludar."
+>
+  {events.length === 0 ? (
+    <p class="empty mono">❯ no hay eventos anunciados por ahora — vuelve pronto</p>
+  ) : (
+    <ol role="list" class="events">
+      {events.map((e, i) => {
+        const d = e.data;
+        const date = dateParts(d.date);
+        return (
+          <li class:list={['event', 'reveal', { next: i === 0 }]}>
+            <time class="date" datetime={date.iso}>
+              <span class="sr-only">{date.full}</span>
+              <span aria-hidden="true" class="wd">{date.weekday}</span>
+              <span aria-hidden="true" class="dd">{date.day}</span>
+              <span aria-hidden="true" class="mm">{date.month}</span>
+            </time>
+
+            {d.cover && (
+              <div class="shot">
+                <Image src={d.cover} alt="" width={640} height={360} fit="cover" position="top" widths={[360, 640]} sizes="(max-width: 900px) 100vw, 320px" />
+              </div>
+            )}
+
+            <div class="body">
+              <div class="badges">
+                {i === 0 && <span class="badge badge-next">Próximo</span>}
+                {d.participation.map((p) => (
+                  <span class:list={['badge', { 'badge-village': /village/i.test(p) }]}>{p}</span>
+                ))}
+              </div>
+
+              <h3>{d.title}</h3>
+
+              <ul role="list" class="facts mono">
+                <li>
+                  <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 14s5-4.2 5-8A5 5 0 0 0 3 6c0 3.8 5 8 5 8Z" /><circle cx="8" cy="6" r="1.8" /></svg>
+                  <span><span class="sr-only">Lugar: </span>{eventPlace(d)}</span>
+                </li>
+                <li>
+                  <svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6" /><path d="M8 4.5V8l2.5 1.5" /></svg>
+                  <span><span class="sr-only">Horario: </span>{eventHours(d)}</span>
+                </li>
+              </ul>
+
+              {d.summary && <p class="summary">{d.summary}</p>}
+
+              {d.highlights.length > 0 && (
+                <div class="village">
+                  <p class="village-label mono">En nuestro espacio</p>
+                  <ul role="list">
+                    {d.highlights.map((h) => <li>{h}</li>)}
+                  </ul>
+                </div>
+              )}
+
+              {d.talks.map((t) => (
+                <div class="talk">
+                  <p class="talk-label mono">Charla</p>
+                  <p class="talk-title">“{t.title}”</p>
+                  <p class="talk-speaker">
+                    {t.speaker}
+                    {t.speakerRole && <span> · {t.speakerRole}</span>}
+                  </p>
+                  <p class="talk-when mono">
+                    {t.time || t.room
+                      ? [t.time, t.room && `Sala ${t.room}`].filter(Boolean).join(' · ')
+                      : 'Horario y sala por confirmar'}
+                  </p>
+                </div>
+              ))}
+
+              <a href={d.url} class="link" rel="noopener" target="_blank">
+                Web del evento
+                <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M5 11 11 5M6 5h5v5" /></svg>
+                <span class="sr-only">(se abre en otra pestaña)</span>
+              </a>
+            </div>
+          </li>
+        );
+      })}
+    </ol>
+  )}
+</Section>
+
+<style>
+  .events { display: grid; gap: 18px; }
+
+  .event {
+    position: relative;
+    display: grid;
+    grid-template-columns: 92px minmax(220px, 320px) 1fr;
+    align-items: start;
+    gap: 28px;
+    padding: 22px;
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    background: linear-gradient(180deg, rgb(255 255 255 / 0.045), rgb(255 255 255 / 0.012));
+    transition: border-color 0.3s, box-shadow 0.3s;
+  }
+  .event:hover { border-color: var(--border-strong); }
+  .event.next {
+    border-color: rgb(179 138 245 / 0.45);
+    box-shadow: 0 0 0 1px rgb(179 138 245 / 0.12) inset, 0 24px 70px -30px var(--glow-violet);
+  }
+
+  /* Bloque de fecha */
+  .date {
+    display: grid;
+    justify-items: center;
+    padding: 14px 0 12px;
+    border-radius: 14px;
+    border: 1px solid var(--border);
+    background: rgb(11 7 19 / 0.6);
+    font-family: var(--ff-mono);
+    text-transform: uppercase;
+    line-height: 1;
+  }
+  .wd, .mm { font-size: 0.72rem; letter-spacing: 0.16em; color: var(--text-muted); }
+  .dd {
+    margin: 0.4rem 0;
+    font: 600 2.6rem/1 var(--ff-display);
+    letter-spacing: -0.04em;
+    background: var(--grad);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .next .date { border-color: rgb(179 138 245 / 0.4); }
+
+  .shot {
+    overflow: hidden;
+    aspect-ratio: 16 / 9;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    background: var(--bg-elev);
+  }
+  .shot :global(img) { width: 100%; height: 100%; object-fit: cover; transition: transform 0.6s var(--ease); }
+  .event:hover .shot :global(img) { transform: scale(1.03); }
+
+  .body { display: grid; justify-items: start; gap: 0.85rem; min-width: 0; }
+
+  .badges { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+  .badge {
+    padding: 0.35rem 0.65rem;
+    border-radius: 999px;
+    border: 1px solid var(--border-strong);
+    font: 500 0.72rem/1 var(--ff-mono);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text);
+  }
+  .badge-village { border-color: rgb(153 213 248 / 0.45); color: var(--cyan); background: rgb(153 213 248 / 0.08); }
+  .badge-next { border: 0; color: #120a20; background: var(--grad); font-weight: 600; }
+
+  h3 { font-size: clamp(1.4rem, 2.4vw, 1.75rem); letter-spacing: -0.02em; }
+
+  .facts { display: flex; flex-wrap: wrap; gap: 0.4rem 1.4rem; font-size: 0.82rem; color: var(--text-muted); }
+  .facts li { display: inline-flex; align-items: center; gap: 0.45rem; }
+  .facts svg { width: 15px; height: 15px; flex: none; fill: none; stroke: var(--violet); stroke-width: 1.4; stroke-linecap: round; stroke-linejoin: round; }
+
+  .summary { color: var(--text-muted); font-size: 0.97rem; max-width: 62ch; }
+
+  .village { width: 100%; }
+  .village-label { font-size: 0.7rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--cyan); }
+  .village ul { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 240px), 1fr)); gap: 0.35rem 1.2rem; margin-top: 0.55rem; }
+  .village li { position: relative; padding-left: 1.2rem; font-size: 0.92rem; color: var(--text); }
+  .village li::before { content: '›'; position: absolute; left: 0; color: var(--cyan); font-family: var(--ff-mono); }
+
+  .talk {
+    width: 100%;
+    padding: 14px 16px;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--violet);
+    background: rgb(139 92 246 / 0.07);
+  }
+  .talk-label { font-size: 0.7rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--violet); }
+  .talk-title { margin-top: 0.4rem; font-size: 1.08rem; font-weight: 500; line-height: 1.4; color: var(--text); }
+  .talk-speaker { margin-top: 0.45rem; font-size: 0.9rem; color: var(--text); }
+  .talk-speaker span { color: var(--text-muted); }
+  .talk-when { margin-top: 0.3rem; font-size: 0.8rem; color: var(--cyan); }
+
+  .link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    margin-top: 0.2rem;
+    font-weight: 500;
+    font-size: 0.95rem;
+    color: var(--text);
+    border-bottom: 1px solid var(--border-strong);
+    padding-bottom: 2px;
+    transition: border-color 0.2s, color 0.2s;
+  }
+  .link:hover { color: var(--cyan); border-color: var(--cyan); }
+  .link svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+
+  .empty { padding: 1.4rem; border: 1px dashed var(--border-strong); border-radius: var(--radius); color: var(--text-muted); font-size: 0.9rem; }
+
+  /* Tablet: fecha + texto, la captura arriba a todo el ancho */
+  @media (max-width: 900px) {
+    .event { grid-template-columns: 76px 1fr; gap: 18px; }
+    .shot { grid-column: 1 / -1; grid-row: 1; }
+    .dd { font-size: 2.1rem; }
+  }
+  @media (max-width: 480px) {
+    .event { grid-template-columns: 1fr; padding: 16px; }
+    .date { grid-auto-flow: column; justify-content: start; align-items: baseline; gap: 0.5rem; padding: 10px 14px; }
+    .dd { margin: 0; font-size: 1.6rem; }
+  }
+</style>

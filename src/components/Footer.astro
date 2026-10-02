@@ -1,0 +1,94 @@
+---
+import Logo from './Logo.astro';
+import { NAV, SITE, SOCIAL } from '../site.config';
+
+const year = new Date().getFullYear();
+---
+
+<footer class="site-footer">
+  <div class="container grid">
+    <div class="about">
+      <Logo />
+      <p class="slogan" lang="en">{SITE.slogan}</p>
+      <p>{SITE.description}</p>
+    </div>
+
+    <nav aria-label="Pie de página">
+      <p class="label">Sitio</p>
+      <ul role="list">
+        {NAV.map((item) => <li><a href={item.href}>{item.label}</a></li>)}
+      </ul>
+    </nav>
+
+    <div>
+      <p class="label">Comunidad</p>
+      <ul role="list">
+        {SOCIAL.map((s) => <li><a href={s.href} rel="noopener" target="_blank">{s.label} ↗</a></li>)}
+      </ul>
+    </div>
+  </div>
+
+  <div class="container legal">
+    <p>© {year} {SITE.name}</p>
+    <p class="mono">Sin rastreadores · sin recursos de terceros</p>
+  </div>
+</footer>
+
+<style>
+  .site-footer {
+    margin-top: var(--section-space);
+    border-top: 1px solid var(--border);
+    background: linear-gradient(to bottom, rgb(18 11 31 / 0.6), transparent);
+    padding-top: 56px;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr;
+    gap: 40px;
+  }
+
+  .about .slogan {
+    margin-top: 1.1rem;
+    font: 500 0.78rem/1.4 var(--ff-mono);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--violet);
+  }
+  .about p {
+    margin-top: 0.6rem;
+    max-width: 42ch;
+    color: var(--text-muted);
+    font-size: 0.95rem;
+  }
+
+  .label {
+    margin-bottom: 0.9rem;
+    font: 500 0.75rem/1 var(--ff-mono);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+  }
+
+  ul { display: grid; gap: 0.55rem; }
+  ul a { color: var(--text-muted); transition: color 0.2s; }
+  ul a:hover { color: var(--text); }
+
+  .legal {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 0.5rem 1.5rem;
+    margin-top: 48px;
+    padding-block: 22px;
+    border-top: 1px solid var(--border);
+    font-size: 0.85rem;
+    color: var(--text-dim);
+  }
+  .legal .mono { font-size: 0.78rem; }
+
+  @media (max-width: 720px) {
+    .grid { grid-template-columns: 1fr 1fr; }
+    .about { grid-column: 1 / -1; }
+  }
+</style>

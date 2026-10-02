@@ -1,0 +1,34 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout title="Página no encontrada" description="Esta ruta no existe en HackL4bs." noindex>
+  <section class="container nf">
+    <p class="code mono" aria-hidden="true">404</p>
+    <h1>Esta ruta no existe.</h1>
+    <p class="mono line"><span>❯</span> cd ./esta-ruta<br /><span class="err">error: no such file or directory</span></p>
+    <div class="ctas">
+      <a href="/" class="btn btn-primary">Volver al inicio</a>
+      <a href="/projects/" class="btn">Ver proyectos</a>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .nf { display: grid; justify-items: center; gap: 1.4rem; padding-top: clamp(64px, 12vw, 140px); text-align: center; }
+  .code {
+    font-size: clamp(6rem, 22vw, 12rem);
+    font-weight: 700;
+    line-height: 0.9;
+    background: var(--grad);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    filter: drop-shadow(0 0 40px rgb(139 92 246 / 0.4));
+  }
+  h1 { font-size: clamp(1.8rem, 4vw, 2.6rem); }
+  .line { font-size: 0.85rem; color: var(--text-muted); text-align: left; padding: 1rem 1.2rem; border: 1px solid var(--border); border-radius: 12px; background: var(--surface); }
+  .line span:first-child { color: var(--violet); }
+  .err { color: #f87171; }
+  .ctas { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.75rem; margin-top: 0.6rem; }
+</style>

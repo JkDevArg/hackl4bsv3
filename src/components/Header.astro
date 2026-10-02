@@ -1,0 +1,174 @@
+---
+// Cabecera fija. El menu movil usa el atributo `popover` del navegador: abre,
+// cierra con Esc o tocando fuera, y no necesita ni una linea de JavaScript.
+import Logo from './Logo.astro';
+import { NAV, SOCIAL } from '../site.config';
+
+const path = Astro.url.pathname;
+const isActive = (href: string) => (href === '/' ? path === '/' : path.startsWith(href));
+---
+
+<header class="site-header">
+  <div class="container bar">
+    <a href="/" class="brand" aria-label="HackL4bs, ir al inicio">
+      <Logo />
+    </a>
+
+    <nav aria-label="Principal" class="nav-desktop">
+      <ul role="list">
+        {NAV.map((item) => (
+          <li>
+            <a href={item.href} aria-current={isActive(item.href) ? 'page' : undefined}>{item.label}</a>
+          </li>
+        ))}
+      </ul>
+    </nav>
+
+    <div class="actions">
+      {SOCIAL.filter((s) => s.header).map((s) => (
+        <a href={s.href} class="social" rel="noopener" target="_blank">
+          {s.label}
+          <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M5 11 11 5M6 5h5v5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" /></svg>
+          <span class="sr-only">(se abre en otra pestaña)</span>
+        </a>
+      ))}
+
+      <button class="menu-btn" popovertarget="mobile-menu" aria-label="Abrir menú">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h16M4 16h16" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" /></svg>
+      </button>
+    </div>
+  </div>
+
+  <nav id="mobile-menu" popover aria-label="Menú">
+    <button class="close" popovertarget="mobile-menu" popovertargetaction="hide" aria-label="Cerrar menú">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" /></svg>
+    </button>
+    <ul role="list">
+      {NAV.map((item) => (
+        <li><a href={item.href} aria-current={isActive(item.href) ? 'page' : undefined}>{item.label}</a></li>
+      ))}
+      {SOCIAL.map((s) => (
+        <li><a href={s.href} rel="noopener" target="_blank">{s.label} ↗</a></li>
+      ))}
+    </ul>
+  </nav>
+</header>
+
+<script>
+  // El unico JavaScript del sitio. Un enlace a otra parte de la MISMA pagina
+  // (/#eventos estando en /) no navega, asi que el popover no se cierra solo y
+  // el scroll ocurria detras del menu abierto.
+  const menu = document.getElementById('mobile-menu');
+  menu?.addEventListener('click', (e) => {
+    if (e.target instanceof Element && e.target.closest('a')) menu.hidePopover();
+  });
+</script>
+
+<style>
+  .site-header {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    border-bottom: 1px solid transparent;
+    background: rgb(11 7 19 / 0.6);
+    backdrop-filter: blur(14px) saturate(140%);
+    -webkit-backdrop-filter: blur(14px) saturate(140%);
+    border-bottom-color: var(--border);
+  }
+
+  .bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.5rem;
+    height: 68px;
+  }
+
+  .brand { display: inline-flex; border-radius: 8px; }
+
+  .nav-desktop ul {
+    display: flex;
+    gap: 0.25rem;
+    padding: 0.3rem;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    background: var(--surface);
+  }
+  .nav-desktop a {
+    display: block;
+    padding: 0.45rem 1rem;
+    border-radius: 999px;
+    font-size: 0.93rem;
+    color: var(--text-muted);
+    transition: color 0.2s, background-color 0.2s;
+  }
+  .nav-desktop a:hover { color: var(--text); }
+  .nav-desktop a[aria-current='page'] { color: var(--text); background: rgb(255 255 255 / 0.08); }
+
+  .actions { display: flex; align-items: center; gap: 0.5rem; }
+
+  .social {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.45rem 0.6rem;
+    font: 500 0.82rem/1 var(--ff-mono);
+    color: var(--text-muted);
+    transition: color 0.2s;
+  }
+  .social:hover { color: var(--text); }
+  .social svg { width: 14px; height: 14px; }
+
+  .menu-btn,
+  .close {
+    display: none;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: var(--surface);
+    color: var(--text);
+    cursor: pointer;
+  }
+  .menu-btn svg,
+  .close svg { width: 22px; height: 22px; }
+
+  /* Menu movil: panel a pantalla completa */
+  #mobile-menu {
+    inset: 0;
+    width: 100%;
+    height: 100dvh;
+    max-width: none;
+    max-height: none;
+    margin: 0;
+    padding: 88px var(--gutter) 32px;
+    border: 0;
+    background: rgb(11 7 19 / 0.96);
+    color: var(--text);
+    backdrop-filter: blur(10px);
+  }
+  #mobile-menu .close { position: absolute; top: 12px; right: var(--gutter); display: grid; }
+  #mobile-menu ul { display: grid; gap: 0.25rem; }
+  #mobile-menu a {
+    display: block;
+    padding: 0.9rem 0;
+    font-size: 1.8rem;
+    font-weight: 500;
+    letter-spacing: -0.02em;
+    border-bottom: 1px solid var(--border);
+  }
+  #mobile-menu a[aria-current='page'] { color: var(--violet); }
+
+  @media (prefers-reduced-motion: no-preference) {
+    #mobile-menu { transition: opacity 0.25s, display 0.25s allow-discrete, overlay 0.25s allow-discrete; opacity: 0; }
+    #mobile-menu:popover-open { opacity: 1; }
+    @starting-style { #mobile-menu:popover-open { opacity: 0; } }
+  }
+
+  @media (max-width: 720px) {
+    .nav-desktop,
+    .social { display: none; }
+    .menu-btn { display: grid; }
+  }
+</style>

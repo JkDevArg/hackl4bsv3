@@ -1,0 +1,77 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import ProjectCard from '../../components/ProjectCard.astro';
+import { getProjects, projectHref } from '../../lib/projects';
+import { SITE_URL } from '../../site.config';
+
+const projects = await getProjects();
+
+const description =
+  'Apps, juegos y retos de ciberseguridad práctica creados por la comunidad HackL4bs.';
+
+const jsonLd = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'CollectionPage',
+    name: 'Proyectos',
+    description,
+    url: `${SITE_URL}/projects/`,
+    isPartOf: { '@id': `${SITE_URL}/#web` },
+    mainEntity: {
+      '@type': 'ItemList',
+      itemListElement: projects.map((p, i) => ({
+        '@type': 'ListItem',
+        position: i + 1,
+        url: new URL(projectHref(p), SITE_URL).href,
+        name: p.data.title,
+      })),
+    },
+  },
+];
+---
+
+<BaseLayout title="Proyectos" description={description} jsonLd={jsonLd}>
+  <section class="container head">
+    <p class="eyebrow">Proyectos</p>
+    <h1>Todo lo que sale del <span class="grad-text">laboratorio</span>.</h1>
+    <p class="intro">{description}</p>
+    <p class="prompt mono" aria-hidden="true">
+      <span>❯</span> ls projects/ <span class="count">— {projects.length} {projects.length === 1 ? 'resultado' : 'resultados'}</span>
+    </p>
+  </section>
+
+  <section class="container" aria-label="Lista de proyectos">
+    <ul role="list" class="grid">
+      {projects.map((p) => (
+        <li class="reveal"><ProjectCard project={p} headingLevel="h2" /></li>
+      ))}
+    </ul>
+  </section>
+</BaseLayout>
+
+<style>
+  .head { padding-top: clamp(48px, 9vw, 104px); padding-bottom: clamp(36px, 5vw, 56px); }
+  h1 {
+    margin-top: 1.2rem;
+    font-size: clamp(2.4rem, 6vw, 4.2rem);
+    letter-spacing: -0.04em;
+    max-width: 16ch;
+  }
+  .intro { margin-top: 1.2rem; max-width: 56ch; color: var(--text-muted); font-size: 1.1rem; }
+  .prompt {
+    margin-top: 2rem;
+    padding-top: 1.2rem;
+    border-top: 1px solid var(--border);
+    font-size: 0.85rem;
+    color: var(--text);
+  }
+  .prompt span:first-child { color: var(--violet); }
+  .count { color: var(--text-dim); }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 340px), 1fr));
+    gap: 20px;
+  }
+  .grid li { display: grid; }
+</style>

@@ -1,0 +1,59 @@
+---
+// Envoltorio para cualquier seccion nueva. Da el espaciado, el encabezado y el
+// ancla (#id) para enlazarla desde el menu. Uso:
+//
+//   <Section id="charlas" eyebrow="Charlas" title="Lo que he presentado">
+//     ...contenido...
+//   </Section>
+export interface Props {
+  id?: string;
+  eyebrow?: string;
+  title?: string;
+  intro?: string;
+  class?: string;
+}
+const { id, eyebrow, title, intro, class: className } = Astro.props;
+const headingId = id ? `${id}-titulo` : undefined;
+---
+
+<section id={id} class:list={['section', className]} aria-labelledby={title ? headingId : undefined}>
+  <div class="container">
+    {(eyebrow || title || intro || Astro.slots.has('actions')) && (
+      <header class="head reveal">
+        <div>
+          {eyebrow && <p class="eyebrow">{eyebrow}</p>}
+          {title && <h2 id={headingId}>{title}</h2>}
+          {intro && <p class="intro">{intro}</p>}
+        </div>
+        <slot name="actions" />
+      </header>
+    )}
+    <slot />
+  </div>
+</section>
+
+<style>
+  .section { padding-top: var(--section-space); scroll-margin-top: 80px; }
+
+  .head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 1.5rem;
+    margin-bottom: clamp(32px, 5vw, 56px);
+  }
+
+  h2 {
+    margin-top: 1rem;
+    font-size: clamp(2rem, 4.4vw, 3.1rem);
+    max-width: 20ch;
+  }
+
+  .intro {
+    margin-top: 1rem;
+    max-width: 58ch;
+    color: var(--text-muted);
+    font-size: 1.08rem;
+  }
+</style>

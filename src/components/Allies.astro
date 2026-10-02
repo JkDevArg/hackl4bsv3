@@ -1,0 +1,51 @@
+---
+// Seccion "Comunidades aliadas": solo logos. Los datos estan en src/data/allies.ts.
+import { Image } from 'astro:assets';
+import Section from './Section.astro';
+import { ALLIES } from '../data/allies';
+---
+
+<Section id="aliados" eyebrow="Juntos" title="Comunidades aliadas">
+  <ul role="list" class="allies">
+    {ALLIES.map((a) => (
+      <li class="ally reveal" title={a.name}>
+        <Image src={a.logo} alt={a.name} width={240} quality={85} sizes="(max-width: 600px) 30vw, 160px" widths={[160, 240]} />
+      </li>
+    ))}
+  </ul>
+</Section>
+
+<style>
+  /* Flex y no grid: con 11 logos, la ultima fila queda centrada en vez de
+     pegada a la izquierda. */
+  .allies {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: clamp(10px, 1.6vw, 18px);
+  }
+
+  .ally {
+    display: grid;
+    place-items: center;
+    width: clamp(96px, 14vw, 164px);
+    aspect-ratio: 1;
+    border-radius: var(--radius);
+    background: #f4f2f9;
+    box-shadow: 0 0 0 1px rgb(255 255 255 / 0.06), 0 10px 30px -18px rgb(0 0 0 / 0.8);
+    transition: transform 0.35s var(--ease), box-shadow 0.35s;
+  }
+  .ally:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 0 0 2px rgb(179 138 245 / 0.7), 0 20px 50px -20px var(--glow-violet);
+  }
+
+  /* El margen interior va en el tamano del logo y no como padding: un padding
+     en % se calcula sobre el ancho de la LISTA, no del recuadro, e inflaba la
+     caja dejando el logo en 0 px. */
+  .ally :global(img) {
+    width: 72%;
+    height: 72%;
+    object-fit: contain;
+  }
+</style>

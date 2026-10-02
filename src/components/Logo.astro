@@ -1,0 +1,35 @@
+---
+// Isotipo (imagen real del logo, sin fondo) + nombre en texto. El nombre va en
+// texto y no en imagen para que se vea nitido a cualquier tamano y lo lean
+// buscadores y lectores de pantalla.
+import { Image } from 'astro:assets';
+import mark from '../assets/brand/mark.png';
+
+export interface Props {
+  size?: number; // alto del isotipo en px
+  showText?: boolean;
+}
+const { size = 34, showText = true } = Astro.props;
+---
+
+<span class="logo">
+  <Image src={mark} alt="" width={size} height={Math.round((size * mark.height) / mark.width)} densities={[1, 2]} loading="eager" />
+  {showText && <span class="name">HACKL4BS</span>}
+</span>
+
+<style>
+  .logo {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+  }
+  img { flex: none; filter: drop-shadow(0 0 12px rgb(139 92 246 / 0.45)); }
+  .name {
+    font: 600 1.12rem/1 var(--ff-display);
+    letter-spacing: 0.08em;
+    background: linear-gradient(95deg, var(--violet) 0%, var(--violet) 55%, var(--blue) 80%, var(--cyan) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+</style>
