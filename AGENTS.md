@@ -24,7 +24,8 @@ Consult these guides before working on related tasks:
 ## Notas del proyecto (hackl4bs.com)
 
 - Sitio estático con casi cero JavaScript (solo el cierre del menú móvil en
-  Header.astro). Antes de añadir otro `<script>`
+  Header.astro y el ocultado de eventos pasados en Events.astro). Antes de
+  añadir otro `<script>`
   o una integración de framework, valora si se puede hacer con HTML/CSS.
 - Nada de recursos de terceros (fuentes, CDN, analíticas): todo se sirve
   desde el propio dominio. El CSP (`security.csp`) lo refuerza.

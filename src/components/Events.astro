@@ -14,15 +14,17 @@ const events = await getUpcomingEvents();
   title="Dónde encontrar a HackL4bs"
   intro="Charlas y villages donde vas a encontrar a la comunidad HackL4bs. Pasa a saludar."
 >
-  {events.length === 0 ? (
-    <p class="empty mono">❯ no hay eventos anunciados por ahora — vuelve pronto</p>
-  ) : (
+  {/* Siempre en el HTML: el script de abajo lo muestra si en el navegador
+      todos los eventos resultan pasados. */}
+  <p class="empty mono" hidden={events.length > 0}>❯ no hay eventos anunciados por ahora — vuelve pronto</p>
+
+  {events.length > 0 && (
     <ol role="list" class="events">
       {events.map((e, i) => {
         const d = e.data;
         const date = dateParts(d.date);
         return (
-          <li class:list={['event', 'reveal', { next: i === 0 }]}>
+          <li class:list={['event', 'reveal', { next: i === 0 }]} data-date={date.iso}>
             <time class="date" datetime={date.iso}>
               <span class="sr-only">{date.full}</span>
               <span aria-hidden="true" class="wd">{date.weekday}</span>
@@ -38,7 +40,8 @@ const events = await getUpcomingEvents();
 
             <div class="body">
               <div class="badges">
-                {i === 0 && <span class="badge badge-next">Próximo</span>}
+                {/* En todos; el CSS solo lo muestra en el que tenga .next */}
+                <span class="badge badge-next">Próximo</span>
                 {d.participation.map((p) => (
                   <span class:list={['badge', { 'badge-village': /village/i.test(p) }]}>{p}</span>
                 ))}
@@ -97,6 +100,26 @@ const events = await getUpcomingEvents();
   )}
 </Section>
 
+<script>
+  // Oculta los eventos que ya pasaron segun la fecha de HOY en hora de Lima,
+  // en el navegador de quien visita. Al compilar ya se descartan los pasados;
+  // esto cubre los dias entre un build y el siguiente, asi que la lista se
+  // mantiene al dia aunque el sitio no se vuelva a subir. Un evento deja de
+  // verse el dia siguiente a su fecha. Sin JavaScript se ve la lista tal como
+  // se compilo.
+  const today = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Lima' }).format(new Date()); // AAAA-MM-DD
+  const items = [...document.querySelectorAll<HTMLElement>('#eventos .event[data-date]')];
+  let first = true;
+  for (const li of items) {
+    const past = (li.dataset.date ?? '') < today;
+    li.hidden = past;
+    li.classList.toggle('next', !past && first); // "Próximo" pasa al siguiente
+    if (!past) first = false;
+  }
+  const empty = document.querySelector<HTMLElement>('#eventos .empty');
+  if (empty && items.length > 0) empty.hidden = items.some((li) => !li.hidden);
+</script>
+
 <style>
   .events { display: grid; gap: 18px; }
 
@@ -113,6 +136,9 @@ const events = await getUpcomingEvents();
     transition: border-color 0.3s, box-shadow 0.3s;
   }
   .event:hover { border-color: var(--border-strong); }
+  /* El display: grid de arriba le gana al [hidden] del navegador. */
+  .event[hidden], .empty[hidden] { display: none; }
+  .event:not(.next) .badge-next { display: none; }
   .event.next {
     border-color: rgb(179 138 245 / 0.45);
     box-shadow: 0 0 0 1px rgb(179 138 245 / 0.12) inset, 0 24px 70px -30px var(--glow-violet);

@@ -4,9 +4,10 @@ Sitio de Hackl4bs hecho con [Astro](https://docs.astro.build). Se compila a HTML
 estático: lo único que se sube al servidor es la carpeta `dist/`.
 
 - **Casi cero JavaScript**: el menú móvil usa `popover`, y las animaciones y
-  transiciones entre páginas son solo CSS. Lo único que corre son unas 150 bytes
-  inline en `Header.astro` que cierran el menú al tocar un enlace de la misma
-  página (`/#eventos`).
+  transiciones entre páginas son solo CSS. Solo hay dos scripts inline
+  pequeños: uno en `Header.astro` cierra el menú al tocar un enlace de la
+  misma página (`/#eventos`), y otro en `Events.astro` oculta los eventos que
+  ya pasaron.
 - **Nada de terceros**: fuentes, imágenes e iconos se sirven desde el propio
   dominio. Sin analíticas ni CDN, con el mismo criterio que la página de descarga.
 - **SEO**: title/description por página, canonical, Open Graph, datos
@@ -126,10 +127,17 @@ talks:                                     # opcional, una o varias
 
 Luego `npm run capturas` le pone como portada una captura de la web del evento.
 
-La sección muestra los eventos **desde el día del build en adelante**: un
-evento que ya pasó sigue visible hasta que vuelvas a compilar y subir. Cada
-evento lleva también datos estructurados `Event` para Google (fecha, lugar y
-ponente).
+**Los eventos pasados se ocultan solos**, en dos capas:
+
+1. Al compilar, los eventos con fecha anterior a hoy no entran al HTML.
+2. En el navegador de cada visitante, un script pequeño compara la fecha de
+   cada evento con la de hoy en hora de Lima y oculta los pasados. Así un
+   evento deja de verse el día siguiente a su fecha **aunque no vuelvas a
+   compilar ni subir**. La etiqueta "Próximo" pasa al siguiente evento, y si
+   ya no queda ninguno aparece "no hay eventos anunciados".
+
+No hace falta borrar los `.md` de eventos pasados. Cada evento lleva también
+datos estructurados `Event` para Google (fecha, lugar y ponente).
 
 ## Añadir una comunidad aliada
 
